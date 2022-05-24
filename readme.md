@@ -7,7 +7,7 @@ transform it using pandas and upload it into Postgres database
 for future analysis.
 
 To try it on your own PC you don't need anything except the docker and
-docker-compose software. Perform the next steps:
+docker-compose tools. Perform the next steps:
 
 1) Clone the repo to your local PC.
 
@@ -26,7 +26,7 @@ pgadmin.
 
 6) Use host name "pgdatabase" to register the server.
 
-7) Explore tables with uploaded data.
+7) Explore uploaded data in tables.
 
 I don't map my containers on any volumes consciously. So when you stop
-docker-compose containers, all data will be lost.
+docker-compose, all data will be lost.
