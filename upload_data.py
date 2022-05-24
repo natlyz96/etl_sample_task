@@ -2,7 +2,7 @@
 # On previous job position I used to write scripts like this and dealt with this type of tasks.
 
 import pandas as pd
-# from sqlalchemy import create_engine
+from sqlalchemy import create_engine
 import os
 
 
@@ -11,11 +11,15 @@ file_url = "https://10d9b011-755b-4b59-9f64-dbfb2ae95d87.filesusr.com/ugd/b84e29
 
 user = 'root'
 password = 'root'
-host = 'localhost'
+# host = 'localhost'
+host = 'pgdatabase'
 port='5432'
 db='olympic_database'
 
 file_name = "athlets_and_events.csv"
+
+table_name_w = "athlets_and_events_winter"
+table_name_s = "athlets_and_events_summer"
 
 def download_csv(file_url, file_name):
     try:
@@ -25,7 +29,7 @@ def download_csv(file_url, file_name):
     finally:
         print('sucessfully downloaded')
 
-def upload_to_pg():
+def upload_to_pg(engine):
 
     df_iter = pd.read_csv("data.csv", iterator=True, chunksize=100000)
 
@@ -34,8 +38,7 @@ def upload_to_pg():
     df_winter = df[df.Season=='Winter']
     df_summer = df[df.Season=='Summer']
 
-    table_name_w = "athlets_and_events_winter"
-    table_name_s = "athlets_and_events_summer"
+
 
     df.head(n=0).to_sql(name=table_name_w, con=engine, if_exists='replace')
     df.head(n=0).to_sql(name=table_name_s, con=engine, if_exists='replace')
@@ -44,7 +47,6 @@ def upload_to_pg():
 
     while True: 
         try:
-            t_start = time()
                 
             df = next(df_iter)
 
@@ -53,17 +55,32 @@ def upload_to_pg():
 
             df.to_sql(name=table_name, con=engine, if_exists='append')
 
-            t_end = time()
-
-            print('inserted another chunk, took %.3f second' % (t_end - t_start))
 
         except StopIteration:
             print("Finished ingesting data into the postgres database")
             break
 
+def simple_validation(engine):
+    df = pd.read_csv(file_name)
+    input_file_rows = df.shape[0]
+
+    query_w =  f"SELECT count(1) FROM {table_name_w}"
+    query_s =  f"SELECT count(1) FROM {table_name_s}"
+
+    df_w = pd.read_sql(query_w, con=engine)
+    df_s = pd.read_sql(query_s, con=engine)
+    
+
+    output_winter_rows = df_w.loc[:, 'count'].item()
+    output_summer_rows = df_s.loc[:, 'count'].item()
+
+    print(f"CSV file contained {input_file_rows}") 
+    print(f"downloaded to postgres {output_winter_rows} for winter and {output_summer_rows} for summer")
+
 
 if __name__ == '__main__':
     download_csv(file_url, file_name)
 
-    df = pd.read_csv("athlets_and_events.csv")
-    print(df.head())
+    engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
+
+    simple_validation(engine)
