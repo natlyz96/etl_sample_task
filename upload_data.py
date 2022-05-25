@@ -1,6 +1,8 @@
 # This is simple example of my code.
 # On previous job position I used to write scripts like this and dealt with this type of tasks.
 import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -93,28 +95,25 @@ def simple_validation(engine, file_name_athlets, file_name_regions, table_name_w
 
 
 if __name__ == '__main__':
-    # url to free .csv dataset with athlets
-    FILE_URL_athlets = "https://10d9b011-755b-4b59-9f64-dbfb2ae95d87.filesusr.com/ugd/b84e29_0668e8b9f89b455aafe12f024d788b71.csv?dn=Olympic%20Athletes%20and%20Events.csv"
-    # url to free .csv dataset with lookup table for regions
-    FILE_URL_regions = "https://10d9b011-755b-4b59-9f64-dbfb2ae95d87.filesusr.com/ugd/b84e29_aab029d948a64ad3803f945d49071b30.csv?dn=Olympic%20Nations%20and%20Region%20Look-Up.csv"
 
-    # filename to save this file locally
-    FILE_NAME_athlets = "athlets_and_events.csv"
-    # filename to save this file locally
-    FILE_NAME_regions = "nations_and_regions.csv"
+    dotenv_path = join(dirname(__file__), '.env')
+    load_dotenv(dotenv_path)
 
-    # credentials for postgres database from container
-    USER = "root"
-    PASSWORD = "root"
-    # parmeters to database connection
-    HOST = "pgdatabase"
-    PORT = "5432"
-    DB = "olympic_database"
+    FILE_URL_athlets = os.getenv("FILE_URL_athlets")
+    FILE_URL_regions = os.getenv("FILE_URL_regions")
 
-    # default tablenames for database
-    TABLE_NAME_WINTER = "athlets_and_events_winter"
-    TABLE_NAME_SUMMER = "athlets_and_events_summer"
-    TABLE_NAME_REGIONS = "nations_and_regions"
+    FILE_NAME_athlets = os.getenv("FILE_NAME_athlets")
+    FILE_NAME_regions = os.getenv("FILE_NAME_regions")
+
+    USER = os.getenv("USER")
+    PASSWORD = os.getenv("PASSWORD")
+    HOST = os.getenv("HOST")
+    PORT = os.getenv("PORT")
+    DB = os.getenv("DB")
+
+    TABLE_NAME_WINTER = os.getenv("TABLE_NAME_WINTER")
+    TABLE_NAME_SUMMER = os.getenv("TABLE_NAME_SUMMER")
+    TABLE_NAME_REGIONS = os.getenv("TABLE_NAME_REGIONS")
 
     try:
         download_csv(FILE_URL_athlets, FILE_NAME_athlets)
