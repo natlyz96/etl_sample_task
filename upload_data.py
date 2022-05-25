@@ -67,32 +67,23 @@ def upload_to_pg(engine, file_name_athlets, file_name_regions, table_name_w, tab
             break
 
 
-def simple_validation(engine, file_name_athlets, file_name_regions, table_name_w, table_name_s, table_name_r):
+def simple_validation(engine, file_name, table_name):
 
-    df = pd.read_csv(file_name_athlets)
-    df_regions = pd.read_csv(file_name_regions)
+    query_sql = f"SELECT count(1) FROM {table_name};"
 
-    input_athlets_rows = df.shape[0]
-    input_regions_rows = df_regions.shape[0]
+    try:
+        df = pd.read_csv(file_name)
 
-    query_w = f"SELECT count(1) FROM {table_name_w};"
-    query_s = f"SELECT count(1) FROM {table_name_s};"
-    query_r = f"SELECT count(1) FROM {table_name_r};"
+        input_file_rows = df.shape[0]
 
-    df_w = pd.read_sql(query_w, con=engine)
-    df_s = pd.read_sql(query_s, con=engine)
-    df_r = pd.read_sql(query_r, con=engine)
+        df_from_pg = pd.read_sql(query_sql, con=engine)
 
-    output_winter_rows = df_w.loc[:, 'count'].item()
-    output_summer_rows = df_s.loc[:, 'count'].item()
-    output_regions_rows = df_r.loc[:, 'count'].item()
-
-    print(f"CSV file {file_name_regions} contains {input_regions_rows} rows.")
-    print(f"Uploaded to postgres {output_regions_rows} rows.")
-    print(f"CSV file {file_name_athlets} contains {input_athlets_rows} rows.")
-    print(
-        f"Uploaded to postgres {output_winter_rows} for winter and {output_summer_rows} for summer, at all: {output_winter_rows + output_summer_rows}.")
-
+        output_rows = df_from_pg.loc[:, 'count'].item()
+    except: 
+        print("Smth went wrong during validation process.")
+    else:
+        print(f"CSV file {file_name} contains {input_file_rows} rows.")
+        print(f"Uploaded to postgres {output_rows} rows into {table_name}.")
 
 if __name__ == '__main__':
 
@@ -130,8 +121,9 @@ if __name__ == '__main__':
         upload_to_pg(engine, FILE_NAME_athlets, FILE_NAME_regions,
                      TABLE_NAME_WINTER, TABLE_NAME_SUMMER, TABLE_NAME_REGIONS)
 
-        simple_validation(engine, FILE_NAME_athlets, FILE_NAME_regions,
-                          TABLE_NAME_WINTER, TABLE_NAME_SUMMER, TABLE_NAME_REGIONS)
+        simple_validation(engine, FILE_NAME_regions, TABLE_NAME_REGIONS)
+        simple_validation(engine, FILE_NAME_athlets, TABLE_NAME_WINTER)
+        simple_validation(engine, FILE_NAME_athlets, TABLE_NAME_SUMMER)
     except:
         print("Smth went wrong, sorry:( ")
     else:
