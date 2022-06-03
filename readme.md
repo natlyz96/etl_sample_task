@@ -28,5 +28,5 @@ pgadmin.
 
 7) Explore uploaded data in tables.
 
-I don't map my containers on any volumes consciously. So when you stop
+I don't map my containers on any volumes deliberately. So when you stop
 docker-compose, all data will be lost.
